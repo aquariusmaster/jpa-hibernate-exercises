@@ -26,11 +26,29 @@ public class QueryHelper {
      * The purpose of this method is to perform read operations using {@link EntityManager}, so it uses read only mode
      * by default.
      *
-     * @param entityManagerConsumer query logic encapsulated as function that receives entity manager and returns result
+     * @param entityManagerFunction query logic encapsulated as function that receives entity manager and returns result
      * @param <T>                   generic type that allows to specify single entity class of some collection
      * @return query result specified by type T
      */
-    public <T> T readWithinTx(Function<EntityManager, T> entityManagerConsumer) {
-        throw new UnsupportedOperationException("I'm waiting for you to do your job and make me work ;)"); // todo:
+    public <T> T readWithinTx(Function<EntityManager, T> entityManagerFunction) {
+        EntityManager entityManager = null;
+        T value = null;
+        try {
+            entityManager = entityManagerFactory.createEntityManager();
+            entityManager.getTransaction().begin();
+            entityManager.unwrap(Session.class).setDefaultReadOnly(true);
+            value = entityManagerFunction.apply(entityManager);
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            if (entityManager != null) {
+                entityManager.getTransaction().rollback();
+            }
+            throw new QueryHelperException("Transaction is rolled back", e);
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        return value;
     }
 }
