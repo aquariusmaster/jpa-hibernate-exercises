@@ -64,7 +64,7 @@ public class AccountDaoImpl implements AccountDao {
             if (entityManager != null) {
                 entityManager.getTransaction().rollback();
             }
-            throw new AccountDaoException("Cannot execute inside Entity Manager", e);
+            throw new AccountDaoException(e.getMessage(), e);
         } finally {
             if (entityManager != null) {
                 entityManager.close();
@@ -84,7 +84,7 @@ public class AccountDaoImpl implements AccountDao {
             if (entityManager != null) {
                 entityManager.getTransaction().rollback();
             }
-            throw new AccountDaoException("Cannot execute inside Entity Manager", e);
+            throw new AccountDaoException(e.getMessage(), e);
         } finally {
             if (entityManager != null) {
                 entityManager.close();
