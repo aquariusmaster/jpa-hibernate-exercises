@@ -1,12 +1,14 @@
 package com.bobocode.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import javax.persistence.CascadeType;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+
+import static javax.persistence.CascadeType.MERGE;
+import static javax.persistence.CascadeType.PERSIST;
+import static lombok.AccessLevel.PRIVATE;
 
 /**
  * todo:
@@ -34,17 +36,50 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@Entity
+@Table(name = "author")
 public class Author {
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @Column(nullable = false)
     private String firstName;
+
+    @Column(nullable = false)
     private String lastName;
-    private Set<Book> books;
+
+    @Setter(PRIVATE)
+    @ManyToMany(cascade = {PERSIST, MERGE})
+    @JoinTable(
+            name = "author_book",
+            joinColumns = @JoinColumn(name = "author_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    private Set<Book> books = new HashSet<>();
 
     public void addBook(Book book) {
-        throw new UnsupportedOperationException("Are you kidding me?");
+        books.add(book);
+        book.getAuthors().add(this);
     }
 
     public void removeBook(Book book) {
-        throw new UnsupportedOperationException("Are you kidding me?");
+        books.remove(book);
+        book.getAuthors().remove(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Author author = (Author) o;
+
+        return id != null ? id.equals(author.id) : author.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }
