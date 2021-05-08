@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.CascadeType.ALL;
+import static lombok.AccessLevel.PRIVATE;
+
 /**
  * todo:
  * - implement no arguments constructor
@@ -26,16 +29,28 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
+@Entity
+@Table(name = "company")
 public class Company {
+    @Id
+    @GeneratedValue
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Setter(PRIVATE)
+    @OneToMany(mappedBy = "company", cascade = ALL)
     private List<Product> products = new ArrayList<>();
 
     public void addProduct(Product product) {
-        throw new UnsupportedOperationException("I'm still not implemented!");
+        products.add(product);
+        product.setCompany(this);
     }
 
     public void removeProduct(Product product) {
-        throw new UnsupportedOperationException("I'm still not implemented!");
+        products.remove(product);
+        product.setCompany(null);
     }
 }
